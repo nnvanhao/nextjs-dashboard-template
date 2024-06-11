@@ -47,7 +47,7 @@ function RegisterForm() {
 
   return (
     <div className="h-screen w-full flex items-center">
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto w-[380px]">
         <CardHeader>
           <CardTitle className="text-2xl">Sign Up</CardTitle>
           <CardDescription>
@@ -125,9 +125,9 @@ function RegisterForm() {
                 "Create an account"
               )}
             </Button>
-            <Button variant="outline" className="w-full">
-              Sign up with Google
-            </Button>
+            {/* <Button variant="outline" className="w-full">
+              Sign up with Github
+            </Button> */}
           </form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}

@@ -1,6 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoaderIcon } from "lucide-react";
+import { useSignIn } from "@/hooks/auth/hooks";
+import { encrypt } from "@/utils/securities";
+import { useRouter } from "next/navigation";
+import useEnterKey from "@/hooks/useEnterKey";
+import { useEffect, useState } from "react";
+import { IError } from "@/hooks/auth/types";
 
 // Define the form data type
 interface LoginFormInputs {
@@ -25,27 +31,43 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors }
-  } = useForm<LoginFormInputs>();
-  const [loading, setLoading] = useState(false);
+  } = useForm<LoginFormInputs>({ mode: "all" });
+
+  useEffect(() => {
+    setErrorMessage("");
+  }, [watch("email"), watch("password")]);
+
+  const [errorMessage, setErrorMessage] = useState<string>();
+
+  const { mutate, isPending } = useSignIn();
+  const { push } = useRouter();
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
-    setLoading(true);
-    try {
-      // Simulate a login request
-      console.log(data);
-      // Handle successful login here
-    } catch (error) {
-      console.error(error);
-      // Handle login error here
-    } finally {
-      setLoading(false);
-    }
+    const secretKey = process.env.NEXT_PUBLIC_SECRET_KEY;
+    const passwordEncrypt = encrypt(data?.password, secretKey!);
+
+    mutate(
+      { email: data.email, password: passwordEncrypt },
+      {
+        onSuccess: () => {
+          push("/dashboard");
+        },
+        onError: (error: IError | any) => {
+          setErrorMessage(error.data.message);
+        }
+      }
+    );
   };
+
+  useEnterKey(() => {
+    handleSubmit(onSubmit)();
+  });
 
   return (
     <div className="h-screen w-full flex items-center">
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto w-[380px]">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
@@ -53,7 +75,7 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-5">
+          <div className="grid gap-4 mt-5">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -69,7 +91,9 @@ function LoginForm() {
                 })}
               />
               {errors.email && (
-                <p className="text-red-600 text-[13px]">{errors.email.message}</p>
+                <p className="text-red-600 text-[13px]">
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div className="grid gap-2">
@@ -96,17 +120,28 @@ function LoginForm() {
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full mt-10">
-              {loading ? (
+            <p className="text-red-600 text-[13px]">{errorMessage}</p>
+            <Button
+              type="submit"
+              className="w-full mt-10"
+              onClick={handleSubmit(onSubmit)}
+            >
+              {isPending ? (
                 <LoaderIcon className="animate-spin w-5 h-5" />
               ) : (
                 "Login"
               )}
             </Button>
-            <Button variant="outline" className="w-full">
-              Login with Google
-            </Button>
-          </form>
+            {/* <Button
+              variant="outline"
+              className="w-full"
+              onClick={async () => {
+                serverSignIn("github");
+              }}
+            >
+              Login with Github
+            </Button> */}
+          </div>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/auth/register" className="underline">

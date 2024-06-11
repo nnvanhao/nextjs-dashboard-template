@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { OtpStyledInput } from "@/components/extension/otp-input";
 import { Card } from "@/components/ui/card";
+import Link from "next/link";
 
 const OtpTest = () => {
   const form = useForm({
@@ -21,7 +22,7 @@ const OtpTest = () => {
     mode: "onBlur" // Trigger validation on blur event
   });
 
-  const onSubmit = (data: { otp: any; }) => {
+  const onSubmit = (data: { otp: any }) => {
     console.log(data);
     toast.success(`Success , Your Otp code is : ${data.otp}`);
   };
@@ -62,6 +63,11 @@ const OtpTest = () => {
                           {...field}
                         />
                       </FormItem>
+                      <div className="flex flex-row-reverse">
+                        <p className="text-sm underline cursor-pointer">
+                          Resend
+                        </p>
+                      </div>
                       <FormMessage>
                         {form.formState.errors.otp && (
                           <p className="text-red-600">
@@ -76,6 +82,12 @@ const OtpTest = () => {
               <Button type="submit" className="mt-4">
                 Submit
               </Button>
+              <div className="mt-4 text-center text-sm">
+                {`Back to `}
+                <Link href="/auth/login" className="underline">
+                  Login
+                </Link>
+              </div>
             </form>
           </Form>
         </div>

@@ -2,6 +2,7 @@
 
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
+import { Quicksand } from "next/font/google";
 
 import "./globals.css";
 
@@ -9,6 +10,9 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { COOKIE } from "@/constants/common";
+import Cookies from "js-cookie";
 
 // export const metadata: Metadata = {
 //   metadataBase: new URL(
@@ -38,6 +42,11 @@ import { Toaster } from "sonner";
 //       "A stunning and functional retractable sidebar for Next.js built on top of shadcn/ui complete with desktop and mobile responsiveness."
 //   }
 // };
+//👇 Configure our font object
+const openSans = Quicksand({
+  subsets: ["vietnamese"],
+  display: "swap"
+});
 
 export default function RootLayout({
   children
@@ -47,17 +56,23 @@ export default function RootLayout({
   const pathname = usePathname(); // Get the current pathname
 
   const isAuthRoute = pathname.startsWith("/auth");
+  // Create a client
+  const queryClient = new QueryClient();
+
+  const token = Cookies.get(COOKIE.TOKEN);
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={GeistSans.className}>
+      <body className={openSans.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Toaster />
-          {isAuthRoute ? (
-            <div className="h-screen w-full">{children}</div>
-          ) : (
-            <AdminPanelLayout>{children}</AdminPanelLayout>
-          )}
+          <QueryClientProvider client={queryClient}>
+            {isAuthRoute ? (
+              <div className="h-screen w-full">{children}</div>
+            ) : (
+              <AdminPanelLayout>{children}</AdminPanelLayout>
+            )}
+          </QueryClientProvider>
         </ThemeProvider>
       </body>
     </html>

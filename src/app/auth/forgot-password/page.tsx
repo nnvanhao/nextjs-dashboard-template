@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -44,7 +44,7 @@ function ForgotPasswordForm() {
 
   return (
     <div className="h-screen w-full flex items-center">
-      <Card className="mx-auto max-w-sm">
+      <Card className="mx-auto w-[380px]">
         <CardHeader>
           <CardTitle className="text-2xl">Reset Password</CardTitle>
           <CardDescription>
@@ -68,10 +68,12 @@ function ForgotPasswordForm() {
                 })}
               />
               {errors.email && (
-                <p className="text-red-600 text-[13px]">{errors.email.message}</p>
+                <p className="text-red-600 text-[13px]">
+                  {errors.email.message}
+                </p>
               )}
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full mt-10">
               {loading ? (
                 <LoaderIcon className="animate-spin w-5 h-5" />
               ) : (
