@@ -8,11 +8,13 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/providers/theme-provider";
 import AdminPanelLayout from "@/components/admin-panel/admin-panel-layout";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { COOKIE } from "@/constants/common";
 import Cookies from "js-cookie";
+import { useEffect, useState } from "react";
+import { LoaderIcon } from "lucide-react";
 
 // export const metadata: Metadata = {
 //   metadataBase: new URL(
@@ -53,13 +55,41 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const pathname = usePathname(); // Get the current pathname
+  const router = useRouter();
 
   const isAuthRoute = pathname.startsWith("/auth");
   // Create a client
   const queryClient = new QueryClient();
 
   const token = Cookies.get(COOKIE.TOKEN);
+
+  useEffect(() => {
+    const unProtectedRouters = [
+      "/",
+      "/auth/register",
+      "/auth/forgot-password",
+      "/auth/otp"
+    ];
+
+    if (!token && !unProtectedRouters.includes(pathname)) {
+      router.push("/auth/login");
+    }
+    setIsLoading(false);
+  }, [pathname, router, token]);
+
+  if (isLoading) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body className={openSans.className}>
+          <div className="w-full h-screen flex items-center justify-center">
+            <LoaderIcon className="animate-spin" />
+          </div>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -69,8 +99,10 @@ export default function RootLayout({
           <QueryClientProvider client={queryClient}>
             {isAuthRoute ? (
               <div className="h-screen w-full">{children}</div>
-            ) : (
+            ) : token ? (
               <AdminPanelLayout>{children}</AdminPanelLayout>
+            ) : (
+              children
             )}
           </QueryClientProvider>
         </ThemeProvider>

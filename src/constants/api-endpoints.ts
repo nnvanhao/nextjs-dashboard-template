@@ -1,5 +1,5 @@
 export const AUTH_API = {
   signIn: {
-    api: "/auth/sign-in"
+    api: "/v1/auth/sign-in"
   }
 }
